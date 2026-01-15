@@ -26,14 +26,6 @@ db = SQLAlchemy(app)
 # SocketIO with broad CORS
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# Initialize database
-with app.app_context():
-    db.create_all()
-    # Create default user if it doesn't exist
-    if not User.query.filter(User.username.ilike('Yuvraj')).first():
-        db.session.add(User(username='Yuvraj', daily_stats='{}'))
-        db.session.commit()
-
 # Models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -121,6 +113,17 @@ def add_xp(user, amount):
         user.xp -= required_xp
         level_up = True
     return level_up
+
+# Initialize database
+with app.app_context():
+    db.create_all()
+    # Create default user if it doesn't exist
+    try:
+        if not User.query.filter(User.username.ilike('Yuvraj')).first():
+            db.session.add(User(username='Yuvraj', daily_stats='{}'))
+            db.session.commit()
+    except Exception as e:
+        print(f"Initial setup error: {e}")
 
 # Routes
 @app.route('/')
