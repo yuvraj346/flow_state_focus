@@ -15,8 +15,8 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Use absolute path for SQLite in production
 # Supabase PostgreSQL Connection
-# Using environment variable if available, otherwise using the provided string
-SUPABASE_URL = "postgresql://postgres:yuvrajsupapassword@db.phujsimyxqvfbxjswrvg.supabase.co:5432/postgres"
+# Adding ?sslmode=require for better compatibility with Supabase
+SUPABASE_URL = "postgresql://postgres:yuvrajsupapassword@db.phujsimyxqvfbxjswrvg.supabase.co:5432/postgres?sslmode=require"
 db_url = os.environ.get("DATABASE_URL", SUPABASE_URL)
 
 # Fix for SQLAlchemy 1.4+ which requires 'postgresql://' instead of 'postgres://'
@@ -29,9 +29,13 @@ app.config['SECRET_KEY'] = 'secret!'
 
 db = SQLAlchemy(app)
 
-# Create tables in Supabase
-with app.app_context():
-    db.create_all()
+# Create tables in Supabase with Error Handling
+try:
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables synced successfully with Supabase!")
+except Exception as e:
+    print(f"❌ Database error during startup: {str(e)}")
 
 # SocketIO with broad CORS
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')

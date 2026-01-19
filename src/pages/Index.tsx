@@ -340,12 +340,6 @@ const Index = () => {
           : event.date;
 
         if (eventDateStr === todayStr && event.time === currentTime && !notifiedEvents.current.has(event.id)) {
-          // Play notification sound
-          if (notificationsEnabled) {
-            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3");
-            audio.play().catch(e => console.log("Audio play failed", e));
-          }
-
           // Show toast
           toast(`Event Starting: ${event.title}`, {
             description: `Scheduled for ${event.time}`,
