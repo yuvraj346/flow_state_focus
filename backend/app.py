@@ -9,6 +9,11 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import os
 from datetime import datetime
+try:
+    import psycopg2
+except ImportError:
+    # Fallback for some environments where psycopg2-binary is installed but not aliased
+    from psycopg2 import binary as psycopg2
 
 app = Flask(__name__)
 # Robust CORS for development
