@@ -13,6 +13,7 @@ import { ProgressDashboard, type ProgressStats, type ProjectProgress } from "@/c
 import { TaskList } from "@/components/tasks/TaskList";
 import { NeuCard } from "@/components/ui/NeuCard";
 import { NeuButton } from "@/components/ui/NeuButton";
+import { NatureBackdrop } from "@/components/habits/NatureBackdrop";
 import { Menu, Bell, User, ClipboardList, PlusCircle, ArrowLeft, ArrowRight, LogOut, Search, X, Paperclip, Camera, Flame, CheckCircle2, Timer, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -78,6 +79,9 @@ const Index = () => {
   const [habits, setHabits] = useState<any[]>([]);
   const [isHabitDialogOpen, setIsHabitDialogOpen] = useState(false);
   const [newHabitName, setNewHabitName] = useState("");
+  const [editingHabit, setEditingHabit] = useState<any>(null);
+  const [isEditHabitDialogOpen, setIsEditHabitDialogOpen] = useState(false);
+  const [editHabitName, setEditHabitName] = useState("");
   const [selectedHabitDays, setSelectedHabitDays] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -86,8 +90,12 @@ const Index = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [theme, setTheme] = useState('default');
   const [uiStyle, setUiStyle] = useState('solid');
-  const [pendingProfilePic, setPendingProfilePic] = useState<string | null>(null);
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [viewingFriend, setViewingFriend] = useState<Friend | null>(null);
+  const [friendProfileData, setFriendProfileData] = useState<any>(null);
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);
@@ -131,10 +139,6 @@ const Index = () => {
     };
 
     const handleNotification = (data: any) => {
-      // Play sound for all notifications
-      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
-      audio.play().catch(e => console.log("Audio play failed", e));
-
       // Refresh notifications and friends list
       if (currentUser) {
         fetchNotifications(currentUser);
@@ -337,8 +341,10 @@ const Index = () => {
 
         if (eventDateStr === todayStr && event.time === currentTime && !notifiedEvents.current.has(event.id)) {
           // Play notification sound
-          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
-          audio.play().catch(e => console.log("Audio play failed", e));
+          if (notificationsEnabled) {
+            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3");
+            audio.play().catch(e => console.log("Audio play failed", e));
+          }
 
           // Show toast
           toast(`Event Starting: ${event.title}`, {
@@ -404,39 +410,104 @@ const Index = () => {
   };
 
   const toggleHabit = (habitId: number, dayIdx: number) => {
+    if (!currentUser) return;
     const habit = habits.find(h => h.id === habitId);
-    if (!habit || !currentUser) return;
+    if (!habit) return;
 
-    let completion = habit.completion.split('');
-    completion[dayIdx] = completion[dayIdx] === '1' ? '0' : '1';
-    const newCompletion = completion.join('');
+    const currentCompletion = habit.completion.split('');
+    currentCompletion[dayIdx] = currentCompletion[dayIdx] === '1' ? '0' : '1';
+    const newCompletion = currentCompletion.join('');
 
+    // Optimistically update
     setHabits(prev => prev.map(h => h.id === habitId ? { ...h, completion: newCompletion } : h));
 
     fetch(`${API_URL}/api/habits`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: habitId, completion: newCompletion, username: currentUser }),
-    }).then(() => fetchProfile(currentUser))
-      .catch(err => console.error(`Failed to toggle habit ${habitId}:`, err));
+    }).catch(err => {
+      console.error(`Failed to toggle habit ${habitId}:`, err);
+      fetchHabits(currentUser); // Rollback
+    });
   };
 
   const handleAddHabit = async () => {
     if (!newHabitName.trim() || !currentUser) return;
+
+    // Create a temporary habit for optimistic UI
+    const tempHabit = {
+      id: Date.now(), // Temporary ID
+      title: newHabitName,
+      completion: "0000000",
+      streak: 0,
+    };
+
+    setHabits(prev => [...prev, tempHabit]);
+    setNewHabitName("");
+    setIsHabitDialogOpen(false);
+
     try {
       const res = await fetch(`${API_URL}/api/habits`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newHabitName, username: currentUser }),
+        body: JSON.stringify({ title: tempHabit.title, username: currentUser }),
       });
       if (res.ok) {
-        fetchHabits(currentUser);
-        setNewHabitName("");
-        setIsHabitDialogOpen(false);
+        const data = await res.json();
+        // Update the temp habit with real ID
+        setHabits(prev => prev.map(h => h.id === tempHabit.id ? { ...h, id: data.id } : h));
         toast.success("Habit created!");
+      } else {
+        setHabits(prev => prev.filter(h => h.id !== tempHabit.id));
+        toast.error("Failed to add habit");
       }
     } catch (err) {
+      setHabits(prev => prev.filter(h => h.id !== tempHabit.id));
       toast.error("Failed to add habit");
+    }
+  };
+
+  const handleEditHabit = async () => {
+    if (!editHabitName.trim() || !currentUser || !editingHabit) return;
+    try {
+      // Optimistic update
+      setHabits(prev => prev.map(h => h.id === editingHabit.id ? { ...h, title: editHabitName } : h));
+      setIsEditHabitDialogOpen(false);
+
+      const res = await fetch(`${API_URL}/api/habits`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingHabit.id, title: editHabitName, username: currentUser }),
+      });
+      if (res.ok) {
+        toast.success("Habit updated");
+        setEditingHabit(null);
+      } else {
+        fetchHabits(currentUser); // Rollback
+      }
+    } catch (err) {
+      console.error("Failed to edit habit:", err);
+      if (currentUser) fetchHabits(currentUser); // Rollback
+    }
+  };
+
+  const handleDeleteHabit = async (habitId: number) => {
+    if (!currentUser) return;
+    try {
+      // Optimistic update
+      setHabits(prev => prev.filter(h => h.id !== habitId));
+
+      const res = await fetch(`${API_URL}/api/habits?username=${currentUser}&id=${habitId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        toast.success("Habit deleted");
+      } else {
+        fetchHabits(currentUser); // Rollback
+      }
+    } catch (err) {
+      console.error("Failed to delete habit:", err);
+      fetchHabits(currentUser); // Rollback
     }
   };
 
@@ -461,34 +532,14 @@ const Index = () => {
     }
   };
 
-  const handleProfilePicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPendingProfilePic(reader.result as string);
-      setIsPreviewDialogOpen(true);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const confirmProfilePic = async () => {
-    if (!pendingProfilePic || !currentUser) return;
+  const fetchFriendProfile = async (friendId: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/user/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser, profilePic: pendingProfilePic }),
-      });
-      if (res.ok) {
-        fetchProfile(currentUser);
-        toast.success("Profile picture updated!");
-        setIsPreviewDialogOpen(false);
-        setPendingProfilePic(null);
-      }
+      const res = await fetch(`${API_URL}/api/user/profile?user=${friendId}`);
+      const data = await res.json();
+      setFriendProfileData(data);
     } catch (err) {
-      toast.error("Upload failed");
+      console.error("Failed to fetch friend profile:", err);
+      toast.error("Could not load friend profile");
     }
   };
 
@@ -500,6 +551,10 @@ const Index = () => {
           friendAvatar={chatFriend.avatar}
           currentUser={currentUser}
           onBack={() => setChatFriend(null)}
+          onViewProfile={() => {
+            setViewingFriend(chatFriend);
+            fetchFriendProfile(chatFriend.name);
+          }}
         />
       );
     }
@@ -659,6 +714,21 @@ const Index = () => {
           </div>
         );
 
+      case "tasks":
+        return (
+          <div className="space-y-6 animate-scale-in">
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <h1 className="text-xl font-bold text-foreground">Tasks</h1>
+            </div>
+            <TaskWidget
+              tasks={tasks}
+              onAddTask={() => setIsTaskDialogOpen(true)}
+              onUpdateTask={handleUpdateTask}
+            />
+          </div>
+        );
+
       case "focus":
         return (
           <div className="space-y-6 animate-scale-in">
@@ -714,6 +784,10 @@ const Index = () => {
               friends={friends}
               onChat={handleChat}
               onAddFriend={() => { }}
+              onViewProfile={(f) => {
+                setViewingFriend(f);
+                fetchFriendProfile(f.name);
+              }}
             />
           </div>
         );
@@ -732,7 +806,13 @@ const Index = () => {
                 tasksCompleted: tasks.filter(t => t.status === 'completed').length,
                 totalTasks: tasks.length,
                 currentStreak: 7,
-                dailyHistory: dailyHistory
+                dailyHistory: dailyHistory,
+                habitHistory: [0, 1, 2, 3, 4, 5, 6].map(dayIdx => {
+                  const dayName = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dayIdx];
+                  const doneCount = habits.filter(h => h.completion && h.completion[dayIdx] === '1').length;
+                  const total = habits.length || 1;
+                  return { day: dayName, rate: Math.round((doneCount / total) * 100) };
+                })
               }}
               projects={mockProjects}
             />
@@ -744,173 +824,202 @@ const Index = () => {
         const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
         return (
-          <div className="space-y-6 animate-scale-in pb-20">
-            <div className="flex items-center justify-between">
+          <div className="animate-scale-in pb-28 -mx-4">
+            {/* Header Area */}
+            <div className="px-4 mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ThemeToggle />
-                <h1 className="text-xl font-bold text-foreground">Daily Habits</h1>
+                <h1 className="text-xl font-bold tracking-tight">Today</h1>
               </div>
-              <div className="flex items-center gap-2">
-                <Popover onOpenChange={(open) => {
-                  if (open && currentUser) fetchNotifications(currentUser);
-                }}>
-                  <PopoverTrigger asChild>
-                    <NeuButton size="icon" variant="icon" className="relative">
-                      <Bell className="w-5 h-5" />
-                      {notifications.some(n => !n.read) && (
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
-                      )}
-                    </NeuButton>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0 bg-background border-border shadow-2xl rounded-2xl">
-                    <div className="p-4 border-b border-border flex items-center justify-between">
-                      <span className="font-bold">Notifications</span>
-                      {notifications.length > 0 && (
-                        <button onClick={handleClearAll} className="text-[10px] text-primary font-bold uppercase hover:underline">Clear All</button>
-                      )}
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-muted-foreground">No alerts yet</div>
-                      ) : (
-                        notifications.map(n => (
-                          <div key={n.id} className="p-4 border-b border-border/50 hover:bg-muted/5 transition-colors relative group">
-                            <button
-                              className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity"
-                              onClick={() => handleDeleteNotification(n.id)}
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                            <div className="font-semibold text-sm">{n.title}</div>
-                            <div className="text-xs text-muted-foreground">{n.message}</div>
-                            <div className="text-[10px] text-muted-foreground/50 mt-1">{n.time}</div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                <NeuButton size="icon" variant="icon" onClick={() => setShowProfile(true)}>
-                  <User className="w-5 h-5" />
-                </NeuButton>
-              </div>
+              <NeuButton size="icon" variant="icon">
+                <Menu className="w-5 h-5" />
+              </NeuButton>
             </div>
 
-            <NeuCard className="p-4 flex justify-between items-center">
+            {/* Date Scroller */}
+            <div className="flex gap-4 overflow-x-auto px-4 pb-4 no-scrollbar">
               {days.map((day, i) => {
                 const isToday = i === currentDayIdx;
+                const d = new Date(Date.now() - (currentDayIdx - i) * 86400000);
                 return (
-                  <div key={day} className="flex flex-col items-center gap-2">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{day}</span>
-                    <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all",
-                      isToday ? "bg-primary text-white shadow-lg glow-primary" : "bg-muted/10 text-muted-foreground"
-                    )}>
-                      {new Date(Date.now() - (currentDayIdx - i) * 86400000).getDate()}
-                    </div>
+                  <div
+                    key={day}
+                    className={cn(
+                      "flex flex-col items-center min-w-[50px] py-3 rounded-2xl transition-all",
+                      isToday ? "bg-foreground/5 shadow-inner" : "opacity-40"
+                    )}
+                  >
+                    <span className="text-[10px] font-black uppercase mb-1">{day}</span>
+                    <span className={cn(
+                      "text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full",
+                      isToday && "bg-primary text-white"
+                    )}>{d.getDate()}</span>
                   </div>
                 )
               })}
-            </NeuCard>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold">Daily Routine</h3>
-                <span className="text-xs text-primary font-bold uppercase tracking-wider cursor-pointer">See all</span>
-              </div>
-
-              <button
-                onClick={() => setIsHabitDialogOpen(true)}
-                className="w-full h-16 bg-primary/5 border-2 border-dashed border-primary/20 rounded-2xl flex items-center justify-center gap-3 text-primary hover:bg-primary/10 transition-all font-bold group mb-2"
-              >
-                <PlusCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                ADD NEW HABIT
-              </button>
-
-              <div className="space-y-3">
-                {habits.length === 0 ? (
-                  <div className="p-16 text-center border-2 border-dashed border-border/30 rounded-3xl bg-muted/5">
-                    <p className="text-muted-foreground font-medium">Create your first habit to start building mastery.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 relative">
-                    {habits.map(h => {
-                      const isDoneToday = h.completion[currentDayIdx] === '1';
-                      return (
-                        <div key={h.id} className="flex items-center gap-4 bg-muted/5 p-4 rounded-2xl border border-border/50 hover:border-primary/30 transition-all group">
-                          <button
-                            onClick={() => toggleHabit(h.id, currentDayIdx)}
-                            className={cn(
-                              "w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300",
-                              isDoneToday
-                                ? "bg-primary border-primary text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]"
-                                : "border-border/40 text-transparent hover:border-primary/50"
-                            )}
-                          >
-                            <CheckCircle2 className="w-5 h-5" />
-                          </button>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-sm text-foreground">{h.title}</h4>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
-                              Streak: <span className="text-primary">{h.streak || 0}</span> days
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
-                            <Timer className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-[10px] font-bold">5 min</span>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
             </div>
 
+            {/* Habit List */}
+            <div className="px-4 space-y-3 mt-6">
+              <button
+                onClick={() => setIsHabitDialogOpen(true)}
+                className="w-full h-12 rounded-2xl border-2 border-dashed border-primary/20 flex items-center justify-center gap-2 text-primary font-bold hover:bg-primary/5 transition-all mb-4"
+              >
+                <PlusCircle className="w-5 h-5" />
+                NEW HABIT
+              </button>
+
+              {habits.length === 0 ? (
+                <div className="p-16 text-center opacity-30">
+                  <p className="font-bold uppercase tracking-widest text-xs">No habits found</p>
+                </div>
+              ) : (
+                habits.map((h, i) => {
+                  const isDoneToday = h.completion[currentDayIdx] === '1';
+                  // Map titles to icons and colors for creative look
+                  const isWater = h.title.toLowerCase().includes('water');
+                  const isExercise = h.title.toLowerCase().includes('exercise') || h.title.toLowerCase().includes('run');
+                  const isRead = h.title.toLowerCase().includes('read') || h.title.toLowerCase().includes('book');
+
+                  return (
+                    <div
+                      key={h.id}
+                      className={cn(
+                        "group relative overflow-hidden rounded-[2rem] p-5 flex items-center gap-5 transition-all",
+                        isDoneToday ? "bg-primary/5 border-primary/20 shadow-inner" : "bg-muted/5 border-transparent border"
+                      )}
+                    >
+                      <div
+                        onClick={() => toggleHabit(h.id, currentDayIdx)}
+                        className={cn(
+                          "w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95",
+                          isWater ? "bg-blue-500/10 text-blue-500" :
+                            isExercise ? "bg-orange-500/10 text-orange-500" :
+                              isRead ? "bg-purple-500/10 text-purple-500" :
+                                "bg-foreground/5 text-foreground/40"
+                        )}
+                      >
+                        {isWater ? <Flame className="w-7 h-7 fill-current" /> :
+                          isExercise ? <Timer className="w-7 h-7" /> :
+                            isRead ? <ClipboardList className="w-7 h-7" /> :
+                              <CheckCircle2 className="w-7 h-7" />}
+                      </div>
+
+                      <div
+                        className="flex-1 cursor-pointer"
+                        onClick={() => toggleHabit(h.id, currentDayIdx)}
+                      >
+                        <h4 className="font-black text-base uppercase tracking-tight">{h.title}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-black text-primary uppercase">★ ACTIVE</span>
+                          <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase">{h.streak || 0}-day streak</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <NeuButton size="icon" variant="icon" className="w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Menu className="w-4 h-4" />
+                            </NeuButton>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-32 p-1 rounded-2xl bg-background border-border shadow-2xl">
+                            <button
+                              onClick={() => {
+                                setEditingHabit(h);
+                                setEditHabitName(h.title);
+                                setIsEditHabitDialogOpen(true);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase hover:bg-primary/5 text-primary rounded-xl"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteHabit(h.id)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase hover:bg-destructive/5 text-destructive rounded-xl"
+                            >
+                              Delete
+                            </button>
+                          </PopoverContent>
+                        </Popover>
+
+                        <div className="text-right">
+                          <div className="text-sm font-black italic">
+                            <span className={isDoneToday ? "text-primary" : "text-muted-foreground/30"}>
+                              {isDoneToday ? '1' : '0'}
+                            </span>
+                            <span className="text-muted-foreground/30 ml-0.5">/1</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Animated checkmark overlay */}
+                      {isDoneToday && (
+                        <div className="absolute top-2 right-2 flex items-center justify-center p-1.5 bg-primary text-white rounded-full scale-75 animate-scale-in">
+                          <CheckCircle2 className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
 
             <Dialog open={isHabitDialogOpen} onOpenChange={setIsHabitDialogOpen}>
-              <DialogContent className="bg-background border-border rounded-3xl max-w-sm">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold">New habit</DialogTitle>
+              <DialogContent className="bg-background border-border rounded-[2.5rem] max-w-sm p-8">
+                <DialogHeader className="mb-6">
+                  <DialogTitle className="text-3xl font-black italic uppercase tracking-tighter">New Quest</DialogTitle>
                 </DialogHeader>
-                <div className="py-6 space-y-6">
+                <div className="space-y-8">
                   <div className="flex justify-center">
-                    <div className="w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center">
+                    <div className="w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center rotate-3 border border-primary/20">
                       <CalendarDays className="w-12 h-12 text-primary" />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-1">Name your habit</label>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Target Name</label>
                     <Input
-                      placeholder="e.g. Morning Meditations"
+                      placeholder="e.g. Daily Meditation"
                       value={newHabitName}
                       onChange={(e) => setNewHabitName(e.target.value)}
-                      className="h-14 bg-muted/20 border-border/50 rounded-2xl focus-visible:ring-primary font-semibold"
+                      className="h-16 bg-muted/5 border-transparent border rounded-2xl focus-visible:ring-1 focus-visible:ring-primary font-black text-lg"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-1">Repeat days</label>
-                    <div className="flex justify-between">
-                      {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
-                        <button
-                          key={i}
-                          className={cn(
-                            "w-9 h-9 rounded-full font-bold text-xs transition-all",
-                            i === currentDayIdx ? "bg-primary text-white" : "bg-muted/20 text-muted-foreground"
-                          )}
-                        >
-                          {day}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
-                <DialogFooter className="pt-2">
+                <DialogFooter className="pt-8">
                   <NeuButton
-                    className="w-full h-14 rounded-2xl text-lg font-bold bg-primary text-white glow-primary"
+                    className="w-full h-16 rounded-2xl text-lg font-black italic uppercase bg-primary text-white shadow-lg glow-primary"
                     onClick={handleAddHabit}
                   >
-                    Save Habit
+                    Set Target
+                  </NeuButton>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isEditHabitDialogOpen} onOpenChange={setIsEditHabitDialogOpen}>
+              <DialogContent className="bg-background border-border rounded-[2.5rem] max-w-sm p-8">
+                <DialogHeader className="mb-6">
+                  <DialogTitle className="text-3xl font-black italic uppercase tracking-tighter">Edit Target</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Target Name</label>
+                    <Input
+                      placeholder="e.g. Daily Meditation"
+                      value={editHabitName}
+                      onChange={(e) => setEditHabitName(e.target.value)}
+                      className="h-16 bg-muted/5 border-transparent border rounded-2xl focus-visible:ring-1 focus-visible:ring-primary font-black text-lg"
+                    />
+                  </div>
+                </div>
+                <DialogFooter className="pt-8">
+                  <NeuButton
+                    className="w-full h-16 rounded-2xl text-lg font-black italic uppercase bg-primary text-white shadow-lg glow-primary"
+                    onClick={handleEditHabit}
+                  >
+                    Update Target
                   </NeuButton>
                 </DialogFooter>
               </DialogContent>
@@ -966,36 +1075,69 @@ const Index = () => {
             <div className="w-10" />
           </div>
 
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleProfilePicUpload}
-              />
-              <div className="w-32 h-32 rounded-full neu-pressed flex items-center justify-center text-4xl font-bold text-primary overflow-hidden border-4 border-background shadow-2xl">
-                {profileData.profilePic ? (
-                  <img src={profileData.profilePic} className="w-full h-full object-cover" />
-                ) : (
-                  profileData.username.charAt(0)
-                )}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="w-8 h-8 text-white" />
+          <div className="flex flex-col items-center">
+            <div className="w-32 h-32 rounded-full neu-pressed flex items-center justify-center text-4xl font-bold text-primary overflow-hidden border-4 border-background shadow-2xl">
+              {profileData.profilePic ? (
+                <img src={profileData.profilePic} className="w-full h-full object-cover" />
+              ) : (
+                profileData.username.charAt(0)
+              )}
+            </div>
+          </div>
+          <div className="text-center w-full px-4">
+            {isEditingName ? (
+              <div className="flex flex-col items-center gap-2">
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  className="text-2xl font-bold bg-transparent border-b-2 border-primary focus:outline-none text-center w-full max-w-[200px]"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setProfileData(prev => ({ ...prev, username: editedName }));
+                      setIsEditingName(false);
+                      toast.success("Profile updated");
+                    }
+                  }}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setProfileData(prev => ({ ...prev, username: editedName }));
+                      setIsEditingName(false);
+                      toast.success("Profile updated");
+                    }}
+                    className="text-[10px] font-black uppercase text-primary hover:underline"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditingName(false)}
+                    className="text-[10px] font-black uppercase text-muted-foreground hover:underline"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
-              <div className="absolute bottom-0 right-0 p-3 bg-primary text-white rounded-2xl shadow-xl border-4 border-background">
-                <Camera className="w-4 h-4" />
+            ) : (
+              <div className="group relative inline-block">
+                <h1 className="text-3xl font-bold">{profileData.username}</h1>
+                <button
+                  onClick={() => {
+                    setEditedName(profileData.username);
+                    setIsEditingName(true);
+                  }}
+                  className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                >
+                  <ArrowRight className="w-4 h-4 rotate-[-45deg]" />
+                </button>
               </div>
-            </div>
-            <div className="text-center">
-              <h1 className="text-3xl font-bold">{profileData.username}</h1>
-              <p className="text-muted-foreground flex items-center justify-center gap-2">
-                <Flame className="w-4 h-4 text-primary" />
-                Flow State Level {profileData.level}
-              </p>
-            </div>
+            )}
+            <p className="text-muted-foreground flex items-center justify-center gap-2 mt-1">
+              <Flame className="w-4 h-4 text-primary" />
+              Flow State Level {profileData.level}
+            </p>
           </div>
 
           <div className="space-y-6 w-full">
@@ -1055,42 +1197,41 @@ const Index = () => {
             </NeuCard>
           </div>
 
-          <NeuCard className="p-4 h-[250px] flex items-center justify-center relative">
-            {profileData.habitradar && profileData.habitradar.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={profileData.habitradar}>
-                  <PolarGrid stroke="hsl(var(--muted-foreground)/0.2)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 'bold' }} />
-                  <Radar
-                    name="Habits"
-                    dataKey="A"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary))"
-                    fillOpacity={0.3}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mx-auto">
-                  <Flame className="w-6 h-6 text-primary/40" />
-                </div>
-                <p className="text-xs text-muted-foreground font-bold uppercase tracking-tighter">No Habit Data Yet</p>
-              </div>
-            )}
-          </NeuCard>
+
 
           <div className="space-y-4">
             <h3 className="font-bold text-lg">Account Settings</h3>
             <NeuCard className="p-0 overflow-hidden">
-              <button className="w-full p-4 flex items-center justify-between hover:bg-muted/5 transition-colors border-b border-border/50">
+              <button
+                onClick={() => {
+                  setEditedName(profileData.username);
+                  setIsEditingName(true);
+                }}
+                className="w-full p-4 flex items-center justify-between hover:bg-muted/5 transition-colors border-b border-border/50"
+              >
                 <span className="font-medium">Edit Profile</span>
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  Change Name <ArrowRight className="w-3 h-3" />
+                </span>
               </button>
-              <button className="w-full p-4 flex items-center justify-between hover:bg-muted/5 transition-colors border-b border-border/50">
-                <span className="font-medium">Notifications</span>
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+              <div className="w-full p-4 flex items-center justify-between border-b border-border/50">
+                <div className="flex flex-col text-left">
+                  <span className="font-medium">Notifications</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">System alerts & Sounds</span>
+                </div>
+                <button
+                  onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                  className={cn(
+                    "w-12 h-6 rounded-full transition-all relative p-1 transition-colors duration-300",
+                    notificationsEnabled ? "bg-primary" : "bg-muted"
+                  )}
+                >
+                  <div className={cn(
+                    "w-4 h-4 bg-white rounded-full transition-transform duration-300 shadow-sm",
+                    notificationsEnabled ? "translate-x-6" : "translate-x-0"
+                  )} />
+                </button>
+              </div>
               <button
                 onClick={() => {
                   localStorage.removeItem("currentUser");
@@ -1102,6 +1243,91 @@ const Index = () => {
                 <LogOut className="w-4 h-4" />
               </button>
             </NeuCard>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderFriendProfile = () => {
+    if (!viewingFriend) return null;
+
+    // Use friendProfileData if available, otherwise use friend object basics
+    const data = friendProfileData || {
+      username: viewingFriend.name,
+      level: viewingFriend.level,
+      totalFocusHours: 0,
+      missionsDone: 0,
+      habitradar: []
+    };
+
+    return (
+      <div className={cn(
+        "fixed inset-0 z-[150] animate-in slide-in-from-bottom duration-300",
+        uiStyle === 'glass' ? "bg-black/40 backdrop-blur-xl" : "bg-background/95"
+      )}>
+        <div className="h-full flex flex-col p-6 space-y-8 overflow-y-auto">
+          <div className="flex items-center justify-between">
+            <NeuButton size="icon" variant="icon" onClick={() => {
+              setViewingFriend(null);
+              setFriendProfileData(null);
+            }}>
+              <X className="w-5 h-5" />
+            </NeuButton>
+            <h2 className="text-xl font-bold uppercase tracking-tighter">Player Card</h2>
+            <div className="w-10" />
+          </div>
+
+          <div className="flex flex-col items-center space-y-6">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-3xl neu-pressed flex items-center justify-center text-4xl font-bold text-primary overflow-hidden border-4 border-background shadow-2xl rotate-3">
+                {viewingFriend.avatar ? (
+                  <img src={viewingFriend.avatar} className="w-full h-full object-cover" />
+                ) : (
+                  viewingFriend.name.charAt(0)
+                )}
+              </div>
+              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center font-black shadow-lg border-2 border-background -rotate-3">
+                {data.level}
+              </div>
+            </div>
+
+            <div className="text-center w-full px-4">
+              <h1 className="text-3xl font-black italic uppercase tracking-tighter text-foreground">{data.username}</h1>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                <span className={cn("w-2 h-2 rounded-full", viewingFriend.status === 'online' ? "bg-success" : "bg-muted-foreground")} />
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">
+                  {viewingFriend.status === 'online' ? "Online Now" : viewingFriend.lastActive || "Status Hidden"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <NeuCard className="p-4 text-center space-y-1">
+              <p className="text-2xl font-black text-primary">{data.totalFocusHours || 0}h</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Total Focus</p>
+            </NeuCard>
+            <NeuCard className="p-4 text-center space-y-1">
+              <p className="text-2xl font-black text-success">{data.missionsDone || 0}</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Completed</p>
+            </NeuCard>
+          </div>
+
+
+
+          <div className="pt-4">
+            <NeuButton
+              className="w-full h-14 rounded-2xl text-sm font-black uppercase italic tracking-wider shadow-lg bg-primary text-white"
+              onClick={() => {
+                handleChat(viewingFriend.id);
+                setViewingFriend(null);
+                setFriendProfileData(null);
+                setActiveTab("friends");
+              }}
+            >
+              Send Message
+            </NeuButton>
           </div>
         </div>
       </div>
@@ -1123,6 +1349,7 @@ const Index = () => {
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       )}
       {showProfile && renderProfile()}
+      {viewingFriend && renderFriendProfile()}
 
       {/* Add Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
@@ -1207,29 +1434,6 @@ const Index = () => {
             >
               Add Task
             </NeuButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Profile Picture Preview Dialog */}
-      <Dialog open={isPreviewDialogOpen} onOpenChange={setIsPreviewDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-background border-none shadow-2xl rounded-3xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-center">Set Profile Picture</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center justify-center space-y-6 py-4">
-            <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-primary/20 shadow-2xl neu-pressed">
-              {pendingProfilePic && (
-                <img src={pendingProfilePic} className="w-full h-full object-cover animate-in zoom-in-50 duration-300" />
-              )}
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center font-bold uppercase tracking-widest px-4 opacity-70">
-              Auto-centering and cropping enabled for a professional fit.
-            </p>
-          </div>
-          <DialogFooter className="flex gap-3 sm:justify-center">
-            <NeuButton onClick={() => setIsPreviewDialogOpen(false)} variant="icon" className="flex-1">Cancel</NeuButton>
-            <NeuButton onClick={confirmProfilePic} variant="primary" className="flex-1">Set Profile Pic</NeuButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

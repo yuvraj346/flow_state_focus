@@ -19,6 +19,7 @@ interface ChatWindowProps {
   friendAvatar?: string;
   currentUser: string | null;
   onBack: () => void;
+  onViewProfile?: () => void;
 }
 
 const ChatWindow = ({
@@ -26,6 +27,7 @@ const ChatWindow = ({
   friendAvatar,
   currentUser,
   onBack,
+  onViewProfile,
 }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -182,7 +184,10 @@ const ChatWindow = ({
           <NeuButton size="icon" variant="icon" onClick={onBack} className="w-10 h-10 bg-muted/20 border-border/10 shadow-none">
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
           </NeuButton>
-          <div className="w-10 h-10 rounded-2xl bg-primary/10 overflow-hidden flex items-center justify-center font-bold text-primary text-lg">
+          <div
+            className="w-10 h-10 rounded-2xl bg-primary/10 overflow-hidden flex items-center justify-center font-bold text-primary text-lg cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200"
+            onClick={onViewProfile}
+          >
             {friendAvatar ? (
               <img src={friendAvatar} alt={friendName} className="w-full h-full object-cover" />
             ) : (
@@ -272,9 +277,6 @@ const ChatWindow = ({
               placeholder="Start typing..."
               className="flex-1 bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground/50 outline-none py-2 font-medium"
             />
-            <NeuButton size="icon" variant="icon" className="w-9 h-9 shrink-0 hover:bg-muted/20 bg-transparent border-none shadow-none">
-              <Smile className="w-5 h-5 text-muted-foreground/60" />
-            </NeuButton>
           </div>
           <NeuButton
             size="icon"

@@ -24,15 +24,30 @@ const ProgressRing = ({
   return (
     <div className={cn("relative inline-flex items-center justify-center", className)}>
       <svg width={size} height={size} className="transform -rotate-90">
+        <defs>
+          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ef4444" />
+            <stop offset="30%" stopColor="#f59e0b" />
+            <stop offset="70%" stopColor="#fbbf24" />
+            <stop offset="100%" stopColor="#10b981" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
         {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--muted))"
+          stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="opacity-50"
+          className="text-muted/20"
         />
         {/* Progress circle */}
         <circle
@@ -40,19 +55,14 @@ const ProgressRing = ({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="url(#progressGradient)"
+          stroke="hsl(var(--primary))"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className="progress-ring transition-all duration-1000 ease-out"
+          filter="url(#glow)"
+          className="progress-ring transition-all duration-1000 cubic-bezier(0.34, 1.56, 0.64, 1)"
         />
-        <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(32 95% 55%)" />
-            <stop offset="100%" stopColor="hsl(45 95% 60%)" />
-          </linearGradient>
-        </defs>
       </svg>
       <div className="absolute flex flex-col items-center justify-center">
         {showPercentage && (

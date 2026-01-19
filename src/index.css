@@ -6,60 +6,60 @@
 
 @layer base {
   :root {
-    /* Neumorphic base - warm gray */
-    --background: 30 15% 92%;
-    --foreground: 30 10% 20%;
+    /* Neumorphic base - Monochrome Slate/White (Matches Reference Image) */
+    --background: 210 20% 96%;
+    --foreground: 222 47% 11%;
 
-    --card: 30 15% 92%;
-    --card-foreground: 30 10% 20%;
+    --card: 210 20% 96%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 30 15% 92%;
-    --popover-foreground: 30 10% 20%;
+    --popover: 210 20% 96%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Amber accent */
-    --primary: 32 95% 55%;
-    --primary-foreground: 0 0% 100%;
+    /* High Contrast Primary (Royal Blue) */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 20% 98%;
 
-    --secondary: 30 10% 85%;
-    --secondary-foreground: 30 10% 25%;
+    --secondary: 210 20% 90%;
+    --secondary-foreground: 222 47% 20%;
 
-    --muted: 30 10% 88%;
-    --muted-foreground: 30 8% 50%;
+    --muted: 210 20% 92%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 32 95% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 221 83% 53%;
+    --accent-foreground: 210 20% 98%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
+    --success: 142 71% 45%;
+    --success-foreground: 210 20% 98%;
 
-    --border: 30 10% 82%;
-    --input: 30 10% 85%;
-    --ring: 32 95% 55%;
+    --border: 210 20% 88%;
+    --input: 210 20% 90%;
+    --ring: 221 83% 53%;
 
-    --radius: 1rem;
+    --radius: 1.5rem;
 
-    /* Neumorphic shadows */
-    --shadow-light: -6px -6px 14px hsl(0 0% 100% / 0.7);
-    --shadow-dark: 6px 6px 14px hsl(30 15% 75% / 0.5);
-    --shadow-inset-light: inset -4px -4px 10px hsl(0 0% 100% / 0.6);
-    --shadow-inset-dark: inset 4px 4px 10px hsl(30 15% 75% / 0.4);
+    /* High-Definition Physical Neumorphic shadows */
+    --shadow-light: -8px -8px 20px hsl(0 0% 100% / 0.8);
+    --shadow-dark: 8px 8px 20px hsl(222 20% 85% / 0.6);
+    --shadow-inset-light: inset -4px -4px 10px hsl(0 0% 100% / 0.7);
+    --shadow-inset-dark: inset 4px 4px 10px hsl(222 20% 85% / 0.5);
 
-    /* Gradient accents */
-    --gradient-primary: linear-gradient(135deg, hsl(32 95% 55%), hsl(25 95% 50%));
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(152 76% 30%));
-    --gradient-progress: linear-gradient(90deg, hsl(32 95% 55%), hsl(45 95% 60%));
+    /* Gradient accents - Slate to Deep Black */
+    --gradient-primary: linear-gradient(135deg, hsl(222 47% 11%), hsl(222 47% 25%));
+    --gradient-success: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 76% 36%));
+    --gradient-progress: linear-gradient(90deg, hsl(222 47% 11%), hsl(222 47% 30%));
 
-    --sidebar-background: 30 15% 92%;
-    --sidebar-foreground: 30 10% 20%;
-    --sidebar-primary: 32 95% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 10% 88%;
-    --sidebar-accent-foreground: 30 10% 20%;
-    --sidebar-border: 30 10% 82%;
-    --sidebar-ring: 32 95% 55%;
+    --sidebar-background: 210 20% 96%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 222 47% 11%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 210 20% 92%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 222 47% 11%;
   }
 
   .dark {
@@ -369,7 +369,7 @@
 
   /* Glow effect for accent elements */
   .glow-accent {
-    box-shadow: 0 0 20px hsl(32 95% 55% / 0.3);
+    box-shadow: 0 0 20px hsl(221 83% 53% / 0.3);
   }
 
   /* Smooth page transitions */
@@ -384,5 +384,46 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes scale-in {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 }

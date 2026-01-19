@@ -15,6 +15,7 @@ interface FriendsListProps {
   friends: Friend[];
   onChat: (friendId: string) => void;
   onAddFriend: () => void;
+  onViewProfile?: (friend: Friend) => void;
 }
 
 const statusColors = {
@@ -23,14 +24,11 @@ const statusColors = {
   busy: "bg-destructive",
 };
 
-const FriendsList = ({ friends, onChat, onAddFriend }: FriendsListProps) => {
+const FriendsList = ({ friends, onChat, onAddFriend, onViewProfile }: FriendsListProps) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-foreground">Friends</h3>
-        <NeuButton size="icon" onClick={onAddFriend}>
-          <UserPlus className="w-5 h-5" />
-        </NeuButton>
       </div>
 
       <div className="space-y-2">
@@ -45,8 +43,14 @@ const FriendsList = ({ friends, onChat, onAddFriend }: FriendsListProps) => {
               className="flex items-center gap-3 cursor-pointer hover:bg-muted/5 transition-colors"
               onClick={() => onChat(friend.id)}
             >
-              <div className="relative">
-                <div className="w-12 h-12 rounded-xl neu-pressed overflow-hidden flex items-center justify-center text-lg font-bold text-primary">
+              <div
+                className="relative"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewProfile?.(friend);
+                }}
+              >
+                <div className="w-12 h-12 rounded-xl neu-pressed overflow-hidden flex items-center justify-center text-lg font-bold text-primary hover:scale-105 transition-transform duration-200">
                   {friend.avatar ? (
                     <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" />
                   ) : (

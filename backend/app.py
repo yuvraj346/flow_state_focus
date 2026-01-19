@@ -14,15 +14,25 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Use absolute path for SQLite in production
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'flowstate.db')
-if not os.path.exists(os.path.join(basedir, 'instance')):
-    os.makedirs(os.path.join(basedir, 'instance'))
+# Supabase PostgreSQL Connection
+# Using environment variable if available, otherwise using the provided string
+SUPABASE_URL = "postgresql://postgres:yuvrajsupapassword@db.phujsimyxqvfbxjswrvg.supabase.co:5432/postgres"
+db_url = os.environ.get("DATABASE_URL", SUPABASE_URL)
 
+# Fix for SQLAlchemy 1.4+ which requires 'postgresql://' instead of 'postgres://'
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'secret!'
 
 db = SQLAlchemy(app)
+
+# Create tables in Supabase
+with app.app_context():
+    db.create_all()
+
 # SocketIO with broad CORS
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
@@ -367,7 +377,7 @@ def create_notification():
     db.session.commit()
     return jsonify({'status': 'success', 'id': notif.id})
 
-@app.route('/api/habits', methods=['GET', 'POST', 'PATCH'])
+@app.route('/api/habits', methods=['GET', 'POST', 'PATCH', 'PUT', 'DELETE'])
 def manage_habits():
     data = request.json if request.is_json else {}
     username = request.args.get('username') or data.get('username')
@@ -379,15 +389,34 @@ def manage_habits():
         habit = Habit(user_id=user.id, title=data['title'])
         db.session.add(habit)
         db.session.commit()
-        return jsonify({'status': 'success'})
+        return jsonify({'status': 'success', 'id': habit.id})
 
     if request.method == 'PATCH':
         data = request.json
         habit = Habit.query.get(data['id'])
-        if habit:
+        if habit and habit.user_id == user.id:
             habit.weekly_completion = data['completion']
             db.session.commit()
-        return jsonify({'status': 'success'})
+            return jsonify({'status': 'success'})
+        return jsonify({'status': 'error'}), 404
+
+    if request.method == 'PUT':
+        data = request.json
+        habit = Habit.query.get(data['id'])
+        if habit and habit.user_id == user.id:
+            habit.title = data['title']
+            db.session.commit()
+            return jsonify({'status': 'success'})
+        return jsonify({'status': 'error'}), 404
+
+    if request.method == 'DELETE':
+        habit_id = request.args.get('id')
+        habit = Habit.query.get(habit_id)
+        if habit and habit.user_id == user.id:
+            db.session.delete(habit)
+            db.session.commit()
+            return jsonify({'status': 'success'})
+        return jsonify({'status': 'error'}), 404
 
     habits = Habit.query.filter_by(user_id=user.id).all()
     return jsonify([{

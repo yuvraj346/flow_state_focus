@@ -58,7 +58,13 @@ const TaskWidget = ({ tasks, onAddTask, onUpdateTask }: TaskWidgetProps) => {
       st.id === subtaskId ? { ...st, completed: !st.completed } : st
     );
 
-    onUpdateTask?.(taskId, { subtasks: updatedSubtasks });
+    const allCompleted = updatedSubtasks.length > 0 && updatedSubtasks.every(st => st.completed);
+    const updates: Partial<Task> = {
+      subtasks: updatedSubtasks,
+      status: allCompleted ? "completed" : (task.status === "completed" ? "inProgress" : task.status)
+    };
+
+    onUpdateTask?.(taskId, updates);
   };
 
   const handleAddSubtask = (taskId: string) => {
@@ -71,9 +77,12 @@ const TaskWidget = ({ tasks, onAddTask, onUpdateTask }: TaskWidgetProps) => {
       completed: false
     };
 
-    onUpdateTask?.(taskId, {
-      subtasks: [...(task?.subtasks || []), newSubtask]
-    });
+    const updates: Partial<Task> = {
+      subtasks: [...(task?.subtasks || []), newSubtask],
+      status: task?.status === "completed" ? "inProgress" : task?.status
+    };
+
+    onUpdateTask?.(taskId, updates);
     setNewSubtaskTitle("");
   };
 
