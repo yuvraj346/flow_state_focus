@@ -15,35 +15,29 @@ app = Flask(__name__)
 # Robust CORS for development
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-# Supabase PostgreSQL Connection
-# pg8000 uses direct SSL context, not query params
-SUPABASE_URL = "postgresql+pg8000://postgres:yuvrajsupapassword@db.phujsimyxqvfbxjswrvg.supabase.co:5432/postgres"
+# Database Configuration
+# Primary: Supabase PostgreSQL (Production)
+SUPABASE_URL = "postgresql://postgres:yuvrajsupapassword@db.phujsimyxqvfbxjswrvg.supabase.co:5432/postgres?sslmode=require"
 db_url = os.environ.get("DATABASE_URL", SUPABASE_URL)
 
-# CRITICAL: pg8000 crashes if 'sslmode' query param is present.
-# We must strip all query params from the URL
-if "?" in db_url:
-    db_url = db_url.split("?")[0]
+# Fix for SQLAlchemy 1.4+ which requires 'postgresql://' instead of 'postgres://'
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-# Ensure we use the correct driver schema in the URL
-if "postgresql://" in db_url:
-    db_url = db_url.replace("postgresql://", "postgresql+pg8000://")
-elif "postgres://" in db_url:
-    db_url = db_url.replace("postgres://", "postgresql+pg8000://")
-
-# Create SSL Context for pg8000
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
+# Remove any lingering +pg8000 driver specs
+if "+pg8000" in db_url:
+    db_url = db_url.replace("+pg8000", "")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "connect_args": {
-        "ssl_context": ssl_context
-    }
-}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'secret!'
+
+# Production-grade connection pooling to prevent timeouts
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_size": 5,
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
 
 @app.route('/', methods=['GET'])
 def root():
