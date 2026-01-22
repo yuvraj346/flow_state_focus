@@ -161,14 +161,14 @@ def add_xp(user, amount):
 
 # Initialize database
 with app.app_context():
-    db.create_all()
-    # Create default user if it doesn't exist
     try:
+        db.create_all()
+        # Create default user if it doesn't exist
         if not User.query.filter(User.username.ilike('Yuvraj')).first():
             db.session.add(User(username='Yuvraj', daily_stats='{}'))
             db.session.commit()
     except Exception as e:
-        print(f"Initial setup error: {e}")
+        print(f"❌ Database initialization error: {e}")
 
 # Routes
 @app.route('/')
