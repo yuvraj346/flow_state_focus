@@ -1,0 +1,398 @@
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 524-433-013
+(22580) wsgi starting up on http://0.0.0.0:5000
+(22580) accepted ('127.0.0.1', 55208)
+127.0.0.1 - - [22/Jan/2026 18:00:24] "OPTIONS /api/auth/register HTTP/1.1" 200 387 0.000000
+(22580) accepted ('127.0.0.1', 58032)
+127.0.0.1 - - [22/Jan/2026 18:00:24] "POST /api/auth/register HTTP/1.1" 200 323 0.303604
+127.0.0.1 - - [22/Jan/2026 18:00:29] "OPTIONS /api/auth/login HTTP/1.1" 200 387 0.000000
+127.0.0.1 - - [22/Jan/2026 18:00:29] "POST /api/auth/login HTTP/1.1" 200 366 0.140038
+127.0.0.1 - - [22/Jan/2026 18:00:29] "GET /socket.io/?EIO=4&transport=polling&t=Plbhqqu HTTP/1.1" 200 352 0.006023
+127.0.0.1 - - [22/Jan/2026 18:00:29] "GET /api/user/profile?username=yuviraj030201@gmail.com HTTP/1.1" 200 396 0.176105
+(22580) accepted ('127.0.0.1', 49666)
+(22580) accepted ('127.0.0.1', 55971)
+(22580) accepted ('127.0.0.1', 62270)
+(22580) accepted ('127.0.0.1', 49670)
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_cors\extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_cors\extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 351, in get_friends
+    print(f"\U0001f465 Fetching friends for: {username}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f465' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:00:30] "GET /api/friends?username=yuviraj030201@gmail.com HTTP/1.1" 500 19428 0.063565
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\hubs\selects.py", line 59, in wait
+    listeners.get(fileno, hub.noop).cb(fileno)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\greenthread.py", line 221, in main
+    result = function(*args, **kwargs)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\wsgi.py", line 837, in process_request
+    proto.__init__(conn_state, self)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\wsgi.py", line 352, in __init__
+    self.finish()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\wsgi.py", line 756, in finish
+    greenio.shutdown_safe(self.connection)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\greenio\base.py", line 502, in shutdown_safe
+    return sock.shutdown(socket.SHUT_RDWR)
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+Removing descriptor: 1088
+message handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 830, in _handle_event
+    ret = handler(auth)
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 655, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 832, in _handle_event
+    ret = handler()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 597, in handle_connect
+    print(f"\u2705 Client connected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:00:30] "POST /socket.io/?EIO=4&transport=polling&t=Plbhqr0&sid=VQDnNnZi2eQmEum1AAAA HTTP/1.1" 200 219 0.006115
+(22580) accepted ('127.0.0.1', 52203)
+127.0.0.1 - - [22/Jan/2026 18:00:30] "GET /socket.io/?EIO=4&transport=polling&t=Plbhqr2&sid=VQDnNnZi2eQmEum1AAAA HTTP/1.1" 200 233 0.000000
+127.0.0.1 - - [22/Jan/2026 18:00:30] "GET /api/notifications?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.239758
+127.0.0.1 - - [22/Jan/2026 18:00:30] "GET /api/tasks?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.483799
+(22580) accepted ('127.0.0.1', 52322)
+127.0.0.1 - - [22/Jan/2026 18:00:30] "GET /api/events?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.436280
+127.0.0.1 - - [22/Jan/2026 18:00:30] "GET /api/habits?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.545234
+(22580) accepted ('127.0.0.1', 52331)
+127.0.0.1 - - [22/Jan/2026 18:00:59] "GET /api/health-check HTTP/1.1" 200 217 0.521106
+ * Detected change in 'C:\\Users\\YUVRAJ\\Downloads\\flow-state-focus-main\\flow-state-focus-main\\backend\\app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 524-433-013
+(28696) wsgi starting up on http://0.0.0.0:5000
+(28696) accepted ('127.0.0.1', 50060)
+127.0.0.1 - - [22/Jan/2026 18:03:40] "GET /socket.io/?EIO=4&transport=polling&t=PlbiZEo HTTP/1.1" 200 352 0.000000
+message handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 830, in _handle_event
+    ret = handler(auth)
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 655, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 832, in _handle_event
+    ret = handler()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 597, in handle_connect
+    print(f"\u2705 Client connected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:03:40] "POST /socket.io/?EIO=4&transport=polling&t=PlbiZVV&sid=tkRCN2k2cZBK9CZ9AAAA HTTP/1.1" 200 219 0.015343
+(28696) accepted ('127.0.0.1', 57711)
+(28696) accepted ('127.0.0.1', 61422)
+(28696) accepted ('127.0.0.1', 57709)
+127.0.0.1 - - [22/Jan/2026 18:03:41] "GET /socket.io/?EIO=4&transport=polling&t=PlbiZVW&sid=tkRCN2k2cZBK9CZ9AAAA HTTP/1.1" 200 233 0.298996
+disconnect handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+TypeError: handle_disconnect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 674, in _handle_eio_disconnect
+    self._handle_disconnect(eio_sid, n, reason)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 571, in _handle_disconnect
+    self._trigger_event('disconnect', namespace, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 624, in _trigger_event
+    return handler(*args[:-1])
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 601, in handle_disconnect
+    print(f"\u274c Client disconnected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /socket.io/?EIO=4&transport=websocket&sid=tkRCN2k2cZBK9CZ9AAAA HTTP/1.1" 200 0 264.002665
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /socket.io/?EIO=4&transport=polling&t=Plbja4k HTTP/1.1" 200 352 0.001978
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /api/user/profile?username=yuviraj030201@gmail.com HTTP/1.1" 200 396 0.188150
+(28696) accepted ('127.0.0.1', 51808)
+(28696) accepted ('127.0.0.1', 64108)
+(28696) accepted ('127.0.0.1', 51823)
+(28696) accepted ('127.0.0.1', 52558)
+(28696) accepted ('127.0.0.1', 55023)
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 1476, in wsgi_app
+    response = self.handle_exception(e)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_cors\extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_cors\extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 351, in get_friends
+    print(f"\U0001f465 Fetching friends for: {username}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f465' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /api/friends?username=yuviraj030201@gmail.com HTTP/1.1" 500 19428 0.033834
+(28696) accepted ('127.0.0.1', 49277)
+message handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 830, in _handle_event
+    ret = handler(auth)
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 655, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 832, in _handle_event
+    ret = handler()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 597, in handle_connect
+    print(f"\u2705 Client connected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:08:05] "POST /socket.io/?EIO=4&transport=polling&t=Plbja52&sid=swB-fIWAKQ27pqVGAAAC HTTP/1.1" 200 219 0.013816
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\hubs\selects.py", line 59, in wait
+    listeners.get(fileno, hub.noop).cb(fileno)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\greenthread.py", line 221, in main
+    result = function(*args, **kwargs)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\wsgi.py", line 837, in process_request
+    proto.__init__(conn_state, self)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\wsgi.py", line 352, in __init__
+    self.finish()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\wsgi.py", line 756, in finish
+    greenio.shutdown_safe(self.connection)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\eventlet\greenio\base.py", line 502, in shutdown_safe
+    return sock.shutdown(socket.SHUT_RDWR)
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+Removing descriptor: 1112
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /api/tasks?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.357019
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /socket.io/?EIO=4&transport=polling&t=Plbja53&sid=swB-fIWAKQ27pqVGAAAC HTTP/1.1" 200 233 0.000000
+127.0.0.1 - - [22/Jan/2026 18:08:05] "GET /socket.io/?EIO=4&transport=polling&t=PlbjaDW&sid=swB-fIWAKQ27pqVGAAAC HTTP/1.1" 200 233 0.000000
+(28696) accepted ('127.0.0.1', 57713)
+127.0.0.1 - - [22/Jan/2026 18:08:06] "GET /api/notifications?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.597222
+127.0.0.1 - - [22/Jan/2026 18:08:06] "GET /api/habits?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.556797
+127.0.0.1 - - [22/Jan/2026 18:08:06] "GET /api/events?username=yuviraj030201@gmail.com HTTP/1.1" 200 240 0.560151
+disconnect handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+TypeError: handle_disconnect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 674, in _handle_eio_disconnect
+    self._handle_disconnect(eio_sid, n, reason)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 571, in _handle_disconnect
+    self._trigger_event('disconnect', namespace, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 624, in _trigger_event
+    return handler(*args[:-1])
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 601, in handle_disconnect
+    print(f"\u274c Client disconnected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:15:04] "GET /socket.io/?EIO=4&transport=websocket&sid=swB-fIWAKQ27pqVGAAAC HTTP/1.1" 200 0 419.074266
+(28696) accepted ('127.0.0.1', 64172)
+127.0.0.1 - - [22/Jan/2026 18:18:46] "GET /socket.io/?EIO=4&transport=polling&t=Plbm0Ry HTTP/1.1" 200 352 0.000000
+message handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 830, in _handle_event
+    ret = handler(auth)
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 655, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 832, in _handle_event
+    ret = handler()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 597, in handle_connect
+    print(f"\u2705 Client connected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:18:46] "POST /socket.io/?EIO=4&transport=polling&t=Plbm0Wz&sid=845lZyMsUb7uCZZqAAAE HTTP/1.1" 200 219 0.017792
+(28696) accepted ('127.0.0.1', 58625)
+(28696) accepted ('127.0.0.1', 54544)
+(28696) accepted ('127.0.0.1', 52104)
+127.0.0.1 - - [22/Jan/2026 18:18:46] "GET /socket.io/?EIO=4&transport=polling&t=Plbm0X2&sid=845lZyMsUb7uCZZqAAAE HTTP/1.1" 200 233 0.316000
+disconnect handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+TypeError: handle_disconnect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 674, in _handle_eio_disconnect
+    self._handle_disconnect(eio_sid, n, reason)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 571, in _handle_disconnect
+    self._trigger_event('disconnect', namespace, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 624, in _trigger_event
+    return handler(*args[:-1])
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 601, in handle_disconnect
+    print(f"\u274c Client disconnected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:19:42] "GET /socket.io/?EIO=4&transport=websocket&sid=845lZyMsUb7uCZZqAAAE HTTP/1.1" 200 0 55.540387
+(28696) accepted ('127.0.0.1', 52258)
+127.0.0.1 - - [22/Jan/2026 18:36:29] "GET /socket.io/?EIO=4&transport=polling&t=Plbq47P HTTP/1.1" 200 352 0.000000
+message handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 830, in _handle_event
+    ret = handler(auth)
+TypeError: handle_connect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 655, in _handle_eio_message
+    self._handle_connect(eio_sid, pkt.namespace, pkt.data)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 538, in _handle_connect
+    success = self._trigger_event(
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 832, in _handle_event
+    ret = handler()
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 597, in handle_connect
+    print(f"\u2705 Client connected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:36:29] "POST /socket.io/?EIO=4&transport=polling&t=Plbq4FK&sid=ZgAgDAS1bU9EN7cgAAAG HTTP/1.1" 200 219 0.000000
+(28696) accepted ('127.0.0.1', 52171)
+(28696) accepted ('127.0.0.1', 60191)
+(28696) accepted ('127.0.0.1', 62342)
+127.0.0.1 - - [22/Jan/2026 18:36:30] "GET /socket.io/?EIO=4&transport=polling&t=Plbq4FL&sid=ZgAgDAS1bU9EN7cgAAAG HTTP/1.1" 200 233 0.616360
+disconnect handler error
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 620, in _trigger_event
+    return handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+TypeError: handle_disconnect() takes 0 positional arguments but 1 was given
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\engineio\server.py", line 450, in run_handler
+    return self.handlers[event](*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 674, in _handle_eio_disconnect
+    self._handle_disconnect(eio_sid, n, reason)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 571, in _handle_disconnect
+    self._trigger_event('disconnect', namespace, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\socketio\server.py", line 624, in _trigger_event
+    return handler(*args[:-1])
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 291, in _handler
+    return self._handle_event(handler, message, real_ns, sid,
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\.venv\lib\site-packages\flask_socketio\__init__.py", line 834, in _handle_event
+    ret = handler(*args)
+  File "C:\Users\YUVRAJ\Downloads\flow-state-focus-main\flow-state-focus-main\backend\app.py", line 601, in handle_disconnect
+    print(f"\u274c Client disconnected: {request.sid}")
+  File "C:\Users\YUVRAJ\AppData\Local\Programs\Python\Python38\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
+127.0.0.1 - - [22/Jan/2026 18:39:20] "GET /socket.io/?EIO=4&transport=websocket&sid=ZgAgDAS1bU9EN7cgAAAG HTTP/1.1" 200 0 169.522039
+ * Detected change in 'C:\\Users\\YUVRAJ\\Downloads\\flow-state-focus-main\\flow-state-focus-main\\backend\\app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 524-433-013

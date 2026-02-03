@@ -2,7 +2,8 @@ flask
 flask-sqlalchemy>=2.5
 flask-cors
 flask-socketio
-eventlet==0.33.3
+eventlet>=0.35.2
+setuptools
 python-dotenv
 gunicorn
 psycopg2-binary==2.9.9
