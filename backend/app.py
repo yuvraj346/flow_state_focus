@@ -20,13 +20,20 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 SUPABASE_URL = "postgresql://postgres:yuvrajsupapassword@db.phujsimyxqvfbxjswrvg.supabase.co:5432/postgres?sslmode=require"
 db_url = os.environ.get("DATABASE_URL", SUPABASE_URL)
 
-# SQLAlchemy 1.4+ COMPATIBILITY FIX: 'postgres://' -> 'postgresql://'
-if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+# SQLAlchemy 1.4+ COMPATIBILITY FIX: 'postgres://' -> 'postgresql+pg8000://'
+if db_url:
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
+    elif db_url.startswith("postgresql://") and "+pg8000" not in db_url:
+        db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
 
-# Clean up any residual driver hints
-if "+pg8000" in db_url:
-    db_url = db_url.replace("+pg8000", "")
+# Clean up any residual sslmode=require if it causes issues with pg8000, 
+# though pg8000 usually handles it via SQLAlchemy
+if "sslmode=require" not in db_url and "supabase" in db_url:
+    if "?" in db_url:
+        db_url += "&sslmode=require"
+    else:
+        db_url += "?sslmode=require"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
