@@ -178,9 +178,8 @@ with app.app_context():
         print(f"❌ Database initialization error: {e}")
 
 # Routes
-@app.route('/')
-def home():
-    return "Flow State API is Running!"
+# Removed duplicate root route
+
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
